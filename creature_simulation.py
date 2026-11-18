@@ -68,6 +68,34 @@ class FlyingCreature(Creature):
             target.hp = 0
         print(f"{target.name} HP is now {target.hp}")
 
+# ===============================
+# FireCreature Branch
+# ===============================
+
+class FireCreature(Creature):
+    def __init__(self, name, hp, attack_power, fire_level=0):
+        super().__init__(name, hp, attack_power)
+        self.fire_level = max(0, min(100, fire_level))
+
+    def emit_fire(self, new_fire_level):
+        # fire_level ต้องอยู่ในช่วง 0-100
+        self.fire_level = max(0, min(100, new_fire_level))
+        print(f"{self.name} emits fire at level {self.fire_level}!")
+
+    def attack(self, target):
+        if not self.is_alive():
+            print(f"{self.name} cannot attack because it is defeated.")
+            return
+
+        # ทุก 10 ระดับของไฟ เพิ่มดาเมจอีก 1
+        fire_bonus = self.fire_level // 10
+        total_damage = self.attack_power + fire_bonus
+
+        print(f"{self.name} unleashes a blazing attack on {target.name}!")
+        print(f"Base damage {self.attack_power} + fire bonus {fire_bonus} = {total_damage} damage!")
+        target.hp = max(0, target.hp - total_damage)
+        print(f"{target.name} HP is now {target.hp}")
+
 if __name__ == "__main__":
     print("=== Creature Class Tests ===\n")
 
@@ -140,5 +168,40 @@ if __name__ == "__main__":
     hawk.attack(dummy)
     print(f"Dummy HP should be 32 → Actual: {dummy.hp}")
     dummy.attack(hawk)
+    print()
+    print("=== Tests Completed ===")
+
+    print()
+    print("=== FireCreature Tests ===\n")
+    drake = FireCreature("Ember Drake", 70, 6)
+    print(f"Fire level should start at 0 → Actual: {drake.fire_level}")
+
+    drake.emit_fire(50)
+    print(f"Fire level should be 50 → Actual: {drake.fire_level}")
+
+    drake.emit_fire(150)
+    print(f"Fire level should be clamped to 100 → Actual: {drake.fire_level}")
+
+    drake.emit_fire(-20)
+    print(f"Fire level should be clamped to 0 → Actual: {drake.fire_level}")
+
+    dummy = Creature("Practice Dummy", 40, 0)
+    drake.emit_fire(50)
+    drake.attack(dummy)
+    print(f"Dummy HP should be 29 (6 + 5 = 11 damage) → Actual: {dummy.hp}")
+
+    drake.emit_fire(0)
+    drake.attack(dummy)
+    print(f"Dummy HP should be 23 (6 damage) → Actual: {dummy.hp}")
+
+    weak = Creature("Weakling", 5, 1)
+    drake.emit_fire(100)
+    drake.attack(weak)
+    print(f"Weakling HP should be 0, not negative → Actual: {weak.hp}")
+
+    drake.hp = 0
+    knight = Creature("Knight", 50, 7)
+    drake.attack(knight)
+    print(f"Knight HP should remain 50 → Actual: {knight.hp}")
     print()
     print("=== Tests Completed ===")
